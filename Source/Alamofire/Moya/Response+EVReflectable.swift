@@ -23,6 +23,21 @@ public extension Response {
         return dictMap(from: dict, forKeyPath: forKeyPath)
     }
     
+    /// spider로 인한 NSArray[0]에 object 가 넘어와 EVReflectable 에서 제공하는 Rmap() 사용시 mapping 실패로 AppCard 에 맞게 수정
+    ///
+    ///  - SeeAlso: Response+EVReflectable.swift 의 Rmap()
+    public func AppCardRmap<T: NSObject>(to type:T.Type, forKeyPath: String? = nil) throws -> T where T: EVReflectable {
+        let json = try mapJSON()
+        var dict: NSDictionary = NSDictionary()
+        if let d = json as? NSDictionary {
+            dict = d
+        } else if let a = json as? NSArray {
+            dict = ["": a.object(at: 0)]
+            return dictMap(from: dict, forKeyPath: "")
+        }
+        return dictMap(from: dict, forKeyPath: forKeyPath)
+    }
+    
     /// Maps data received from the signal into an array of objects which implement the ALSwiftyJSONAble protocol
     /// If the conversion fails, the signal errors.
     public func RmapArray<T: NSObject>(to type:T.Type, forKeyPath: String? = nil) throws -> [T] where T: EVReflectable {
